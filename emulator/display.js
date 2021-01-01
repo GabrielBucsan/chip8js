@@ -35,9 +35,9 @@ class Display {
 
     for (let i = 0; i < data.length; i++) {
 
-      const xIndex1 = 8 % xPos;
+      const xIndex1 = xPos % 8;
 
-      let modifiedData = parseInt(data[i], 2) >> (8 - xIndex1);
+      let modifiedData = parseInt(data[i], 2) >> xIndex1;
       const index = ((yPos + i) % this.sizeY) * this.sizeX + (Math.floor((xPos % (this.sizeX * 8)) / this.sizeX));
       let currentValue = this.displayMemory.getUint8(index % 0xFF);
       if (currentValue & modifiedData > 0) alteredPixels = true;
@@ -45,16 +45,16 @@ class Display {
       this.displayMemory.setUint8(index % 0xFF, value);
 
       if (xIndex1 != 0) {
-        modifiedData = (parseInt(data[i], 2) << (xIndex1)) & 0xFF;
+        modifiedData = (parseInt(data[i], 2) << (8 - xIndex1)) & 0xFF;
         currentValue = this.displayMemory.getUint8((index + 1) % 0xFF);
         if (currentValue & modifiedData > 0) alteredPixels = true;
         value = currentValue ^ modifiedData;
         if ((Math.floor((xPos % (this.sizeX * 8)) / this.sizeX)) + 1 < this.sizeX)
           this.displayMemory.setUint8((index + 1) % 0xFF, value);
       }
-
-      return alteredPixels;
     }
+
+    return alteredPixels;
   }
 
   print() {

@@ -3,9 +3,10 @@
     <div class="left-panel">
       <registers ref="registers"></registers>
       <memory ref="memory"></memory>
+    </div>
+    <div>
       <display ref="display"></display>
     </div>
-    <div></div>
   </div>
 </template>
 
@@ -51,7 +52,7 @@ body {
   margin: 0;
 
   --background-color: #0e0e0e;
-  --primary-color: #4af626;
+  --primary-color: #4af628;
 
   background-color: var(--background-color);
   color: var(--primary-color);

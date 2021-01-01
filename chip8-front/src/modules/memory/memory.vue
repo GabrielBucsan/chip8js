@@ -32,11 +32,6 @@ export default {
   created() {
     this.update();
   },
-  filters: {
-    hex(value, size = 2) {
-      return `${value.toString(16).padStart(size, "0").toUpperCase()}`;
-    },
-  },
   methods: {
     update() {
       const pcAddress = this.cpu.getProgramCounter();

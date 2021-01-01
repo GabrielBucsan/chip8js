@@ -167,7 +167,6 @@ class CPU {
       // 6XNN
       // 	Sets VX to NN.
       case 0x6: {
-        console.log('instruction');
         const VXIndex = (raw >> 8) & 0xF;
         const value = raw & 0xFF;
         this.setRegister(VXIndex, value);
@@ -331,7 +330,6 @@ class CPU {
 
   step() {
     const instruction = this.fetch();
-    console.log(instruction);
     return this.execute(instruction);
   }
 }
