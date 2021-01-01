@@ -365,7 +365,7 @@ class CPU {
           // 8XYE
           // Stores the most significant bit of VX in VF and then shifts VX to the left by 1
           case 0xe: {
-            const bit = valueX & 0x1;
+            const bit = (valueX & 0xff) >> 7;
             this.setRegister(15, bit);
             this.setRegister(VXIndex, (valueX << 1) & 0xff);
             return;

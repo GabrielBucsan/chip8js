@@ -127,7 +127,7 @@ const decode = function(raw){
         // 8XY6
         // Stores the least significant bit of VX in VF and then shifts VX to the right by 1
         case 0x6: {
-          return `SHR  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return `SHR  V${toHex(VXIndex, 1)}`;
         }
 
         // 8XY7
@@ -139,7 +139,7 @@ const decode = function(raw){
         // 8XYE
         // Stores the most significant bit of VX in VF and then shifts VX to the left by 1
         case 0xe: {
-          return `SHL  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return `SHL  V${toHex(VXIndex, 1)}`;
         }
       }
 
