@@ -335,8 +335,9 @@ class CPU {
           case 0x5: {
             let total = valueX - valueY;
             if (valueY > valueX) {
-              this.setRegister(15, 1);
-            } else this.setRegister(15, 0);
+              this.setRegister(15, 0);
+              total = 0;
+            } else this.setRegister(15, 1);
             this.setRegister(VXIndex, total & 0xff);
             return;
           }
@@ -355,8 +356,8 @@ class CPU {
           case 0x7: {
             let total = valueY - valueX;
             if (valueX > valueY) {
-              this.setRegister(15, 1);
-            } else this.setRegister(15, 0);
+              this.setRegister(15, 0);
+            } else this.setRegister(15, 1);
             this.setRegister(VXIndex, total & 0xff);
             return;
           }
@@ -407,9 +408,9 @@ class CPU {
       // Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
       case 0xc: {
         const rnd = Math.floor(Math.random() * 255) + 0;
-        const index = (raw >> 8) & 0xf;
+        const VXIndex = (raw >> 8) & 0xf;
         const value = raw & 0xff;
-        this.setRegister(index, value & rnd);
+        this.setRegister(VXIndex, value & rnd);
         return;
       }
 
@@ -535,7 +536,8 @@ class CPU {
           case 0x1e: {
             const VXIndex = (raw >> 8) & 0xf;
             const value = this.getRegister(VXIndex);
-            this.addressRegister.setUint8(0, this.addressRegister.getUint8(0) + value);
+            const nextAddress = Number(this.addressRegister.getUint16(0)) + Number(value);
+            this.addressRegister.setUint16(0, nextAddress);
             return;
           }
 
