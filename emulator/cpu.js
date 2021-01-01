@@ -19,6 +19,8 @@ class CPU {
 
     this.stack = mem.createMemory(32);
 
+    this.halted = false;
+
     // FILLS THE INITIAL MEMORY ADDRESSES WITH THE CHARACTERS FROM 0 TO F
     const sprites = [
       0xf0,
@@ -127,6 +129,7 @@ class CPU {
     ];
 
     this.keyPressed = [];
+    this.lastKeyPressed;
 
     for (let i = 0; i < this.keyMap.length; i++) {
       this.keyPressed[this.keyMap[i]] = false;
@@ -442,19 +445,166 @@ class CPU {
 
         return;
       }
+
+      case 0xe: {
+
+        const id = raw & 0xff;
+
+        switch (id) {
+          // EX9E
+          // Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block)
+          case 0x9e: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const key = this.getRegister(VXIndex);
+            const pressed = this.keyPressed[this.keyMap[key]];
+            if(pressed){
+              const address = this.programCounter.getUint16(0);
+              this.programCounter.setUint16(0, address + 2);
+            }
+            return;
+          }
+
+          // EXA1
+          // Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block)
+          case 0xa1: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const key = this.getRegister(VXIndex);
+            const pressed = this.keyPressed[this.keyMap[key]];
+            if(!pressed){
+              const address = this.programCounter.getUint16(0);
+              this.programCounter.setUint16(0, address + 2);
+            }
+            return;
+          }
+        }
+        return;
+      }
+
+      case 0xf: {
+
+        const id = raw & 0xff;
+
+        switch (id) {
+          // FX07
+          // Sets VX to the value of the delay timer.
+          case 0x07: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const value = this.delayTimer.getUint8(0);
+            this.setRegister(VXIndex, value);
+            return;
+          }
+
+          // FX0A
+          // A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event)
+          case 0x0a: {
+
+            if(!this.halted){
+              this.halted = true;
+              this.setProgramCounter(this.getProgramCounter() - 2);
+            }else if(this.lastKeyPressed){
+              this.halted = false;
+              const VXIndex = (raw >> 8) & 0xf;
+              this.setRegister(VXIndex, this.keyMap.indexOf(this.lastKeyPressed));
+              this.lastKeyPressed = undefined;
+              this.setProgramCounter(this.getProgramCounter() + 2);
+            }
+
+            return;
+          }
+
+          // FX15
+          // Sets the delay timer to VX.
+          case 0x15: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const value = this.getRegister(VXIndex);
+            this.delayTimer.setUint8(0, value);
+            return;
+          }
+
+          // FX18
+          // Sets the sound timer to VX.
+          case 0x18: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const value = this.getRegister(VXIndex);
+            this.soundTimer.setUint8(0, value);
+            return;
+          }
+
+          // FX1E
+          // Adds VX to I. VF is not affected
+          case 0x1e: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const value = this.getRegister(VXIndex);
+            this.addressRegister.setUint8(0, this.addressRegister.getUint8(0) + value);
+            return;
+          }
+
+          // FX29
+          // Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
+          case 0x29: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const character = this.getRegister(VXIndex);
+            const address = character * 5;
+            this.addressRegister.setUint16(0, address);
+            return;
+          }
+
+          // FX33
+          // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+          case 0x33: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const value = this.getRegister(VXIndex);
+            const stringValue = Number(value).toString(10).padStart(3, "0");
+            const address = this.addressRegister.getUint16(0);
+            for (let i = 0; i < 3; i++) {
+              this.memory.setUint8(address + i, Number(stringValue[i]));
+            }
+            return;
+          }
+
+          // FX55
+          // Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+          case 0x55: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const address = this.addressRegister.getUint16(0);
+            for (let i = 0; i < VXIndex + 1; i++) {
+              this.memory.setUint8(address + i, this.getRegister(i));
+            }
+            return;
+          }
+
+          // FX65
+          // Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+          case 0x65: {
+            const VXIndex = (raw >> 8) & 0xf;
+            const address = this.addressRegister.getUint16(0);
+            for (let i = 0; i < VXIndex + 1; i++) {
+              this.setRegister(i, this.memory.getUint8(address + i));
+            }
+            return;
+          }
+        }
+        return;
+      }
+
     }
   }
 
   setKey(key, set) {
     if(this.keyMap.includes(key)){
       this.keyPressed[key] = set;
+      if(set && this.halted){
+        this.lastKeyPressed = key;
+      }else{
+        this.lastKeyPressed = undefined;
+      }
     }
   }
 
   step() {
-    console.log(this.keyPressed);
-    const instruction = this.fetch();
-    return this.execute(instruction);
+    if(!this.halted)
+      this.nextInstruction = this.fetch();
+    return this.execute(this.nextInstruction);
   }
 }
 

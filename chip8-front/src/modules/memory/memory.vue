@@ -14,7 +14,7 @@
         v-bind:class="{ selected: content.selected }"
       >
         <span>{{ content.address | hex(4) }} </span>
-        <span>{{ content.value | hex }}</span>
+        <span>{{ content.value | hex(4) }}</span>
       </div>
     </div>
   </div>
