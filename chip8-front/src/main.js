@@ -2,11 +2,13 @@ import Vue from 'vue'
 import App from './App.vue'
 import CPU from "../../emulator/cpu.js";
 import mem from '../../emulator/memory.js';
+import Display from "../../emulator/display.js";
 
 Vue.config.productionTip = false
 
 const memory = mem.createMemory(4096);
-const cpu = new CPU(memory);
+const display = new Display(64, 32);
+const cpu = new CPU(memory, display);
 
 const writable = new Uint8Array(30);
 let i = 0;
@@ -26,6 +28,7 @@ new Vue({
   render: h => h(App),
   provide: {
     cpu,
-    memory
+    memory,
+    display
   }
 }).$mount('#app')

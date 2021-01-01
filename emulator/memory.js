@@ -1,7 +1,7 @@
-const createMemory = sizeInBytes => {
-    const buffer = new ArrayBuffer(sizeInBytes);
-    const dataView = new DataView(buffer);
-    return dataView;
-}
+const createMemory = (sizeInBytes) => {
+  const buffer = new ArrayBuffer(sizeInBytes);
+  const dataView = new DataView(buffer);
+  return dataView;
+};
 
-export default {createMemory}
+export default { createMemory };
