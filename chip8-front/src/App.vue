@@ -3,6 +3,7 @@
     <div class="left-panel">
       <registers ref="registers"></registers>
       <memory ref="memory"></memory>
+      <keyboard></keyboard>
     </div>
     <div>
       <display ref="display"></display>
@@ -14,12 +15,14 @@
 import Registers from "./modules/registers/registers.vue";
 import Memory from "./modules/memory/memory.vue";
 import Display from "./modules/display/display.vue";
+import Keyboard from "./modules/keyboard/keyboard.vue";
 export default {
   name: "App",
   components: {
     Registers,
     Memory,
     Display,
+    Keyboard
   },
   inject: ["cpu"],
   created() {

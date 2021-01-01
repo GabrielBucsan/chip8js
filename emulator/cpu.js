@@ -21,22 +21,86 @@ class CPU {
 
     // FILLS THE INITIAL MEMORY ADDRESSES WITH THE CHARACTERS FROM 0 TO F
     const sprites = [
-      0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-      0x20, 0x60, 0x20, 0x20, 0x70, // 1
-      0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-      0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-      0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-      0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-      0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-      0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-      0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-      0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-      0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-      0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-      0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-      0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-      0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-      0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+      0xf0,
+      0x90,
+      0x90,
+      0x90,
+      0xf0, // 0
+      0x20,
+      0x60,
+      0x20,
+      0x20,
+      0x70, // 1
+      0xf0,
+      0x10,
+      0xf0,
+      0x80,
+      0xf0, // 2
+      0xf0,
+      0x10,
+      0xf0,
+      0x10,
+      0xf0, // 3
+      0x90,
+      0x90,
+      0xf0,
+      0x10,
+      0x10, // 4
+      0xf0,
+      0x80,
+      0xf0,
+      0x10,
+      0xf0, // 5
+      0xf0,
+      0x80,
+      0xf0,
+      0x90,
+      0xf0, // 6
+      0xf0,
+      0x10,
+      0x20,
+      0x40,
+      0x40, // 7
+      0xf0,
+      0x90,
+      0xf0,
+      0x90,
+      0xf0, // 8
+      0xf0,
+      0x90,
+      0xf0,
+      0x10,
+      0xf0, // 9
+      0xf0,
+      0x90,
+      0xf0,
+      0x90,
+      0x90, // A
+      0xe0,
+      0x90,
+      0xe0,
+      0x90,
+      0xe0, // B
+      0xf0,
+      0x80,
+      0x80,
+      0x80,
+      0xf0, // C
+      0xe0,
+      0x90,
+      0x90,
+      0x90,
+      0xe0, // D
+      0xf0,
+      0x80,
+      0xf0,
+      0x80,
+      0xf0, // E
+      0xf0,
+      0x80,
+      0xf0,
+      0x80,
+      0x80, // F
     ];
 
     for (let i = 0; i < sprites.length; i++) {
@@ -44,11 +108,23 @@ class CPU {
     }
 
     this.keyMap = [
-      '1', '2', '3', '4',
-      'q', 'w', 'e', 'r',
-      'a', 's', 'd', 'f',
-      'z', 'x', 'c', 'v'
-    ]
+      "1",
+      "2",
+      "3",
+      "4",
+      "q",
+      "w",
+      "e",
+      "r",
+      "a",
+      "s",
+      "d",
+      "f",
+      "z",
+      "x",
+      "c",
+      "v",
+    ];
 
     this.keyPressed = [];
 
@@ -64,15 +140,13 @@ class CPU {
   }
 
   setRegister(index, value) {
-    if (index > 16)
-      throw new Error(`[CPU] No such register`);
+    if (index > 16) throw new Error(`[CPU] No such register`);
 
     this.registers.setUint8(index, value);
   }
 
   getRegister(index) {
-    if (index > 16)
-      throw new Error(`[CPU] No such register`);
+    if (index > 16) throw new Error(`[CPU] No such register`);
 
     return this.registers.getUint8(index);
   }
@@ -95,13 +169,14 @@ class CPU {
 
   fetch() {
     const address = this.getProgramCounter();
-    const content = (this.memory.getUint8(address) << 8) + (this.memory.getUint8(address + 1) & 0xFF);
+    const content =
+      (this.memory.getUint8(address) << 8) +
+      (this.memory.getUint8(address + 1) & 0xff);
     this.setProgramCounter(address + 2);
     return content;
   }
 
   execute(raw) {
-
     const instruction = raw >> 12;
 
     switch (instruction) {
@@ -147,6 +222,19 @@ class CPU {
         const stackPos = this.stackPointer.getUint8(0);
         this.stack.setUint16(stackPos, this.getProgramCounter());
         this.setProgramCounter(address);
+        return;
+      }
+
+      // 3XNN
+      // Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block)
+      case 0x3: {
+        const VXIndex = (raw >> 8) & 0xf;
+        const value = raw & 0xff;
+        if (this.getRegister(VXIndex) == value) {
+          const address = this.programCounter.getUint16(0);
+          this.programCounter.setUint16(0, address + 2);
+        }
+        return;
       }
 
       // 4XNN
@@ -173,24 +261,21 @@ class CPU {
         return;
       }
 
-      // 3XNN
-      // Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block)
-      case 0x3: {
-        const VXIndex = (raw >> 8) & 0xf;
-        const value = raw & 0xff;
-        if (this.getRegister(VXIndex) == value) {
-          const address = this.programCounter.getUint16(0);
-          this.programCounter.setUint16(0, address + 2);
-        }
-        return;
-      }
-
       // 6XNN
       // 	Sets VX to NN.
       case 0x6: {
         const VXIndex = (raw >> 8) & 0xf;
         const value = raw & 0xff;
         this.setRegister(VXIndex, value);
+        return;
+      }
+
+      // 7XNN
+      // Adds NN to VX. (Carry flag is not changed)
+      case 0x7: {
+        const VXIndex = (raw >> 8) & 0xf;
+        const value = raw & 0xff;
+        this.setRegister(VXIndex, this.getRegister(VXIndex) + value);
         return;
       }
 
@@ -315,6 +400,16 @@ class CPU {
         return;
       }
 
+      // CXNN
+      // Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
+      case 0xc: {
+        const rnd = Math.floor(Math.random() * 255) + 0;
+        const index = (raw >> 8) & 0xf;
+        const value = raw & 0xff;
+        this.setRegister(index, value & rnd);
+        return;
+      }
+
       // DXYN
       // Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N+1 pixels.
       // Each row of 8 pixels is read as bit-coded starting from memory location I;
@@ -348,10 +443,16 @@ class CPU {
         return;
       }
     }
+  }
 
+  setKey(key, set) {
+    if(this.keyMap.includes(key)){
+      this.keyPressed[key] = set;
+    }
   }
 
   step() {
+    console.log(this.keyPressed);
     const instruction = this.fetch();
     return this.execute(instruction);
   }
