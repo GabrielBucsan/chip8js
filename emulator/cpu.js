@@ -83,6 +83,14 @@ class CPU{
         return this.programCounter.getUint16(0);
     }
 
+    getMemoryAt(index){
+        return this.memory.getUint8(index);
+    }
+
+    getMemoryAt16(index){
+        return this.memory.getUint16(index);
+    }
+
     fetch(){
         const address = this.getProgramCounter();
         const content = (this.memory.getUint8(address) << 8) + (this.memory.getUint8(address + 1) & 0xFF);
@@ -104,7 +112,7 @@ class CPU{
                 // Clears the screen.
                 switch (id) {
                     case 0xE0:{
-                        // this.display.clearDisplay();
+                        this.display.clearDisplay();
                         return;
                     }
                 }
@@ -309,14 +317,11 @@ class CPU{
                     data.push(this.memory.getUint8(address + i).toString(2).padStart(8, '0'));
                 }
 
-                console.log(valueX);
-                console.log(valueY);
-
-                // let alteredPixels = this.display.drawSprite(valueX, valueY, data);
-                // if(alteredPixels)
-                //     this.setRegister(15, 1);
-                // else
-                //     this.setRegister(15, 0);
+                let alteredPixels = this.display.drawSprite(valueX, valueY, data);
+                if(alteredPixels)
+                    this.setRegister(15, 1);
+                else
+                    this.setRegister(15, 0);
 
                 return;
             }
@@ -328,62 +333,6 @@ class CPU{
         const instruction = this.fetch();
         console.log(instruction);
         return this.execute(instruction);
-    }
-
-    // SHOWS THE CONTENTS OF EACH REGISTER
-    viewRegisters(){
-        let label = " REGISTERS ";
-        console.log(label.padStart(64 + label.length / 2, "-").padEnd(132, "-"));
-        console.log();
-        let registers = '';
-        let values = '';
-        for (let i = 0; i < 16; i++) {
-            registers += `${`V${i}`.padEnd(5, ' ')}`
-            values += `${this.getRegister(i).toString(16).toUpperCase().padStart(2, '0')}   `;
-        }
-        registers += `${`PC`.padEnd(6, ' ')}`
-        values += `${this.programCounter.getUint16(0).toString(16).toUpperCase().padStart(4, '0')}  `;
-        registers += `${`I`.padEnd(6, ' ')}`
-        values += `${this.addressRegister.getUint16(0).toString(16).toUpperCase().padStart(4, '0')}  `;
-        registers += `${`SP`.padEnd(4, ' ')}`
-        values += `${this.stackPointer.getUint8(0).toString(16).toUpperCase().padStart(2, '0')}  `;
-        registers += `${`DT`.padEnd(4, ' ')}`
-        values += `${this.delayTimer.getUint8(0).toString(16).toUpperCase().padStart(2, '0')}  `;
-        registers += `${`ST`.padEnd(4, ' ')}`
-        values += `${this.soundTimer.getUint8(0).toString(16).toUpperCase().padStart(2, '0')}  `;
-        console.log(registers);
-        console.log(values);
-        console.log();
-    }
-
-    // SHOWS THE CONTENT OF MEMORY WITH SIZE X BYTES
-    viewMemoryAt(address, sizeInBytes = 22){
-        let label = ` MEMORY AT ${address.toString(16).toUpperCase().padStart(4, '0')} `;
-        console.log(label.padStart(64 + label.length / 2, "-").padEnd(132, "-"));
-        console.log();
-        let memoryString = '';
-        for (let i = 0; i < sizeInBytes; i++) {
-            const memoryContent = this.memory.getUint16(address + i * 2);
-            memoryString += ` ${memoryContent.toString(16).toUpperCase().padStart(4, '0')} `;
-        }
-        console.log(memoryString);
-        console.log();
-    }
-
-    // SHOW THE STATUS OF THE KEYS
-    viewKeys(){
-        let label = ` KEY STATUS `;
-        console.log(label.padStart(64 + label.length / 2, "-").padEnd(132, "-"));
-        console.log();
-        let keys = '';
-        let pressed = '';
-        for (let i = 0; i < this.keyMap.length; i++) {
-            keys += `  ${this.keyMap[i]}  `;
-            pressed += `  ${(this.keyPressed[i])? 'X' : ' '}  `;
-        }
-        console.log(keys);
-        console.log(pressed);
-        console.log();
     }
 }
 

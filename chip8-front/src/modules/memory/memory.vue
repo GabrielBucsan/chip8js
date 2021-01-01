@@ -2,8 +2,14 @@
   <div id="memory">
       <div class='memory-container'>
         <span class='memory-label'>MEMORY</span>
-        <div v-for='content in memoryContent' :key='content.address'>
-
+        <div class='memory-header'>
+          <span>ADDRESS</span>
+          <span>CONTENT</span>
+          <span>OPCODE</span>
+        </div>
+        <div v-for='content in memoryContent' :key='content.address' class='memory-item' v-bind:class="{'selected': content.selected}">
+          <span>{{ content.address | hex(4)}}     </span>
+          <span>{{ content.value | hex}}</span>
         </div>
       </div>
   </div>
@@ -28,13 +34,41 @@ export default {
   },
   methods:{
     update(){
-        const pcAddress = this.cpu.getProgramCounter();
+      const pcAddress = this.cpu.getProgramCounter();
 
-        let before = pcAddress - 8;
-        if(before < 0) before = 0;
+      let before = pcAddress - 16;
+      if(before < 0) before = 0;
 
-        let after = pcAddress + 8;
-        if(after > 4096) after = 4096;
+      let after = pcAddress + 16;
+      if(after > 4096) after = 4096;
+
+      let content = [];
+
+      for (let i = 0; i < 8; i++) {
+        let index = before + i * 2;
+        content.push({
+          address: index,
+          value: this.cpu.getMemoryAt16(index),
+          selected: false
+        });
+      }
+
+      content.push({
+          address: pcAddress,
+          value: this.cpu.getMemoryAt16(pcAddress),
+          selected: true
+        });
+
+      for (let i = 0; i < 8; i++) {
+        let index = after - 14 + i * 2;
+        content.push({
+          address: index,
+          value: this.cpu.getMemoryAt16(index),
+          selected: false
+        });
+      }
+
+      this.memoryContent = content;
     }
   }
 }
@@ -61,6 +95,22 @@ export default {
     width: 100px;
     text-align: center;
     background-color: var(--background-color);
+}
+
+.memory-header{
+  margin: 5px 0;
+  border-bottom: 1px solid;
+}
+
+.memory-header, .memory-item{
+  display: grid;
+  grid-template-columns: 25% 25% 50%;
+}
+
+.memory-item.selected{
+  color: var(--background-color);
+  background-color: var(--primary-color);
+  font-weight: bold;
 }
 
 </style>

@@ -25,6 +25,7 @@ export default {
       if (e.key == 'Enter') {
         this.cpu.step();
         this.$refs.registers.update();
+        this.$refs.memory.update();
       }
     });
   },
