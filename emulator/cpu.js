@@ -17,6 +17,8 @@ class CPU {
     this.delayTimer = mem.createMemory(1);
     this.soundTimer = mem.createMemory(1);
 
+    this.stack = mem.createMemory(32);
+
     // FILLS THE INITIAL MEMORY ADDRESSES WITH THE CHARACTERS FROM 0 TO F
     const sprites = [
       0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -103,16 +105,25 @@ class CPU {
     const instruction = raw >> 12;
 
     switch (instruction) {
-
       // 00E
       case 0x0: {
-        const id = raw & 0xFF;
+        const id = raw & 0xff;
 
-        // 00E0
-        // Clears the screen.
         switch (id) {
-          case 0xE0: {
+          // 00E0
+          // Clears the screen.
+          case 0xe0: {
             this.display.clearDisplay();
+            return;
+          }
+
+          // 00EE
+          // Returns from a subroutine
+          case 0xee: {
+            const stackPos = this.stackPointer.getUint8(0);
+            const address = this.stack.getUint16(stackPos);
+            this.setProgramCounter(address);
+            this.stackPointer.setUint8(0, stackPos - 1);
             return;
           }
         }
@@ -123,19 +134,29 @@ class CPU {
       // 1NNN
       // Jumps to address NNN
       case 0x1: {
-        const address = raw & 0xFFF;
+        const address = raw & 0xfff;
         this.setProgramCounter(address);
         return;
+      }
+
+      // 2NNN
+      // Calls subroutine at NNN
+      case 0x2: {
+        const address = raw & 0xfff;
+        this.stackPointer.setUint8(0, stackPos + 1);
+        const stackPos = this.stackPointer.getUint8(0);
+        this.stack.setUint16(stackPos, this.getProgramCounter());
+        this.setProgramCounter(address);
       }
 
       // 4XNN
       // Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block)
       case 0x4: {
-        const VXIndex = (raw >> 8) & 0xF;
-        const value = raw & 0xFF;
+        const VXIndex = (raw >> 8) & 0xf;
+        const value = raw & 0xff;
         if (this.getRegister(VXIndex) != value) {
           const address = this.programCounter.getUint16(0);
-          this.programCounter.setUint16(0, address + 2)
+          this.programCounter.setUint16(0, address + 2);
         }
         return;
       }
@@ -143,11 +164,11 @@ class CPU {
       // 5XY0
       // Skips the next instruction if VX equals VY. (Usually the next instruction is a jump to skip a code block)
       case 0x5: {
-        const VXIndex = (raw >> 8) & 0xF;
-        const VYIndex = (raw >> 4) & 0xF;
+        const VXIndex = (raw >> 8) & 0xf;
+        const VYIndex = (raw >> 4) & 0xf;
         if (this.getRegister(VXIndex) == this.getRegister(VYIndex)) {
           const address = this.programCounter.getUint16(0);
-          this.programCounter.setUint16(0, address + 2)
+          this.programCounter.setUint16(0, address + 2);
         }
         return;
       }
@@ -155,11 +176,11 @@ class CPU {
       // 3XNN
       // Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block)
       case 0x3: {
-        const VXIndex = (raw >> 8) & 0xF;
-        const value = raw & 0xFF;
+        const VXIndex = (raw >> 8) & 0xf;
+        const value = raw & 0xff;
         if (this.getRegister(VXIndex) == value) {
           const address = this.programCounter.getUint16(0);
-          this.programCounter.setUint16(0, address + 2)
+          this.programCounter.setUint16(0, address + 2);
         }
         return;
       }
@@ -167,22 +188,21 @@ class CPU {
       // 6XNN
       // 	Sets VX to NN.
       case 0x6: {
-        const VXIndex = (raw >> 8) & 0xF;
-        const value = raw & 0xFF;
+        const VXIndex = (raw >> 8) & 0xf;
+        const value = raw & 0xff;
         this.setRegister(VXIndex, value);
         return;
       }
 
       // 8XY
       case 0x8: {
-        const VXIndex = (raw >> 8) & 0xF;
+        const VXIndex = (raw >> 8) & 0xf;
         const valueX = this.getRegister(VXIndex);
-        const VYIndex = (raw >> 4) & 0xF;
+        const VYIndex = (raw >> 4) & 0xf;
         const valueY = this.getRegister(VYIndex);
-        const id = raw & 0xF;
+        const id = raw & 0xf;
 
         switch (id) {
-
           // 8XY0
           // 	Sets VX to the value of VY.
           case 0x0: {
@@ -215,10 +235,10 @@ class CPU {
           // Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
           case 0x4: {
             let total = valueX + valueY;
-            if (total > 0xFF) {
+            if (total > 0xff) {
               this.setRegister(15, 1);
             } else this.setRegister(15, 0);
-            this.setRegister(VXIndex, total & 0xFF);
+            this.setRegister(VXIndex, total & 0xff);
             return;
           }
 
@@ -229,7 +249,7 @@ class CPU {
             if (valueY > valueX) {
               this.setRegister(15, 1);
             } else this.setRegister(15, 0);
-            this.setRegister(VXIndex, total & 0xFF);
+            this.setRegister(VXIndex, total & 0xff);
             return;
           }
 
@@ -249,16 +269,16 @@ class CPU {
             if (valueX > valueY) {
               this.setRegister(15, 1);
             } else this.setRegister(15, 0);
-            this.setRegister(VXIndex, total & 0xFF);
+            this.setRegister(VXIndex, total & 0xff);
             return;
           }
 
           // 8XYE
           // Stores the most significant bit of VX in VF and then shifts VX to the left by 1
-          case 0xE: {
+          case 0xe: {
             const bit = valueX & 0x1;
             this.setRegister(15, bit);
-            this.setRegister(VXIndex, (valueX << 1) & 0xFF);
+            this.setRegister(VXIndex, (valueX << 1) & 0xff);
             return;
           }
         }
@@ -269,41 +289,41 @@ class CPU {
       // 9XY0
       // Skips the next instruction if VX doesn't equal VY. (Usually the next instruction is a jump to skip a code block)
       case 0x9: {
-        const VXIndex = (raw >> 8) & 0xF;
-        const VYIndex = (raw >> 4) & 0xF;
+        const VXIndex = (raw >> 8) & 0xf;
+        const VYIndex = (raw >> 4) & 0xf;
         if (this.getRegister(VXIndex) != this.getRegister(VYIndex)) {
           const address = this.programCounter.getUint16(0);
-          this.programCounter.setUint16(0, address + 2)
+          this.programCounter.setUint16(0, address + 2);
         }
         return;
       }
 
       // ANNN
       // Sets I to the address NNN.
-      case 0xA: {
-        const address = raw & 0xFFF;
+      case 0xa: {
+        const address = raw & 0xfff;
         this.addressRegister.setUint16(0, address);
         return;
       }
 
       // BNNN
       // Jumps to the address NNN plus V0.
-      case 0xB: {
-        const address = raw & 0xFFF;
+      case 0xb: {
+        const address = raw & 0xfff;
         const value0 = this.getRegister(0);
         this.programCounter.setUint16(0, address + value0);
         return;
       }
 
       // DXYN
-      // Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N+1 pixels. 
-      // Each row of 8 pixels is read as bit-coded starting from memory location I; 
-      // I value doesn’t change after the execution of this instruction. 
+      // Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N+1 pixels.
+      // Each row of 8 pixels is read as bit-coded starting from memory location I;
+      // I value doesn’t change after the execution of this instruction.
       // As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen
-      case 0xD: {
-        const VXIndex = (raw >> 8) & 0xF;
-        const VYIndex = (raw >> 4) & 0xF;
-        const quantity = (raw & 0xF) + 1;
+      case 0xd: {
+        const VXIndex = (raw >> 8) & 0xf;
+        const VYIndex = (raw >> 4) & 0xf;
+        const quantity = (raw & 0xf) + 1;
 
         const valueX = this.getRegister(VXIndex);
         const valueY = this.getRegister(VYIndex);
@@ -313,14 +333,17 @@ class CPU {
         let data = [];
 
         for (let i = 0; i < quantity; i++) {
-          data.push(this.memory.getUint8(address + i).toString(2).padStart(8, '0'));
+          data.push(
+            this.memory
+              .getUint8(address + i)
+              .toString(2)
+              .padStart(8, "0")
+          );
         }
 
         let alteredPixels = this.display.drawSprite(valueX, valueY, data);
-        if (alteredPixels)
-          this.setRegister(15, 1);
-        else
-          this.setRegister(15, 0);
+        if (alteredPixels) this.setRegister(15, 1);
+        else this.setRegister(15, 0);
 
         return;
       }
