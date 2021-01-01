@@ -28,9 +28,9 @@ export default {
       this.update();
   },
   filters: {
-      hex(value, size = 2){
-          return `${value.toString(16).padStart(size, '0').toUpperCase()}`;
-      }
+    hex(value, size = 2){
+      return `${value.toString(16).padStart(size, '0').toUpperCase()}`;
+    }
   },
   methods:{
     update(){
