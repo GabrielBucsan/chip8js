@@ -38,19 +38,21 @@ class Display {
       const xIndex1 = xPos % 8;
 
       let modifiedData = parseInt(data[i], 2) >> xIndex1;
-      const index = ((yPos + i) % this.sizeY) * this.sizeX + (Math.floor((xPos % (this.sizeX * 8)) / this.sizeX));
-      let currentValue = this.displayMemory.getUint8(index % 0xFF);
-      if (currentValue & modifiedData > 0) alteredPixels = true;
+      let index = ((yPos + i) % this.sizeY) * this.sizeX + (Math.floor((xPos % (this.sizeX * 8)) / this.sizeX));
+      if(index > 255) index = 0;
+      let currentValue = this.displayMemory.getUint8(index);
+      if ((currentValue & modifiedData) > 0) alteredPixels = true;
       let value = currentValue ^ modifiedData;
-      this.displayMemory.setUint8(index % 0xFF, value);
+      this.displayMemory.setUint8(index, value);
 
       if (xIndex1 != 0) {
         modifiedData = (parseInt(data[i], 2) << (8 - xIndex1)) & 0xFF;
-        currentValue = this.displayMemory.getUint8((index + 1) % 0xFF);
-        if (currentValue & modifiedData > 0) alteredPixels = true;
+        if(index + 1 > 255) index = -1;
+        currentValue = this.displayMemory.getUint8((index + 1));
+        if ((currentValue & modifiedData) > 0) alteredPixels = true;
         value = currentValue ^ modifiedData;
         if ((Math.floor((xPos % (this.sizeX * 8)) / this.sizeX)) + 1 < this.sizeX)
-          this.displayMemory.setUint8((index + 1) % 0xFF, value);
+          this.displayMemory.setUint8((index + 1), value);
       }
     }
 

@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "Displat",
+  name: "Display",
   inject: ["display"],
   data() {
     return {
