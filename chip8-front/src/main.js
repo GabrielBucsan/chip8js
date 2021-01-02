@@ -15,22 +15,25 @@ const memory = mem.createMemory(4096);
 const display = new Display(64, 32);
 const cpu = new CPU(memory, display);
 
-const writable = new Uint8Array(500);
+const writable = new Uint8Array(3583);
 
-for (let i = 0; i < roms['test1'].length; i++) {
-  writable[i] = roms['test1'][i];
+for (let i = 0; i < roms['invaders'].length; i++) {
+  writable[i] = roms['invaders'][i];
 }
 
 // let i = 0;
 
 // writable[i++] = 0x60;
-// writable[i++] = 0x1d;
+// writable[i++] = 0x38;
+
+// writable[i++] = 0x61;
+// writable[i++] = 0x1b;
 
 // writable[i++] = 0xA0;
 // writable[i++] = 0x05;
 
 // writable[i++] = 0xD0;
-// writable[i++] = 0x04;
+// writable[i++] = 0x15;
 
 // writable[i++] = 0x60;
 // writable[i++] = 0x07;

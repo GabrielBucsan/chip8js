@@ -17,7 +17,7 @@ class CPU {
     this.delayTimer = mem.createMemory(1);
     this.soundTimer = mem.createMemory(1);
 
-    this.stack = mem.createMemory(32);
+    this.stack = mem.createMemory(128);
 
     this.halted = false;
 
@@ -199,7 +199,7 @@ class CPU {
           // Returns from a subroutine
           case 0xee: {
             const stackPos = this.stackPointer.getUint8(0);
-            const address = this.stack.getUint16(stackPos);
+            const address = this.stack.getUint16(stackPos - 1);
             this.setProgramCounter(address);
             this.stackPointer.setUint8(0, stackPos - 1);
             return;
@@ -221,10 +221,10 @@ class CPU {
       // Calls subroutine at NNN
       case 0x2: {
         const address = raw & 0xfff;
-        this.stackPointer.setUint8(0, stackPos + 1);
         const stackPos = this.stackPointer.getUint8(0);
         this.stack.setUint16(stackPos, this.getProgramCounter());
         this.setProgramCounter(address);
+        this.stackPointer.setUint8(0, stackPos + 1);
         return;
       }
 
@@ -422,7 +422,7 @@ class CPU {
       case 0xd: {
         const VXIndex = (raw >> 8) & 0xf;
         const VYIndex = (raw >> 4) & 0xf;
-        const quantity = (raw & 0xf) + 1;
+        const quantity = (raw & 0xf);
 
         const valueX = this.getRegister(VXIndex);
         const valueY = this.getRegister(VYIndex);
@@ -606,7 +606,11 @@ class CPU {
   step() {
     if(!this.halted)
       this.nextInstruction = this.fetch();
-    return this.execute(this.nextInstruction);
+    this.execute(this.nextInstruction);
+    let DT = this.delayTimer.getUint8(0);
+    if(DT > 0)
+      this.delayTimer.setUint8(0, DT - 1);
+    return;
   }
 }
 

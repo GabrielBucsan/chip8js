@@ -149,15 +149,17 @@ export default {
 
       const stackAddress = this.cpu.stackPointer.getUint8(0);
 
-      before = stackAddress - 2;
+      before = stackAddress - 1;
 
-      after = stackAddress + 6;
+      after = stackAddress + 3;
       if (after > 32) after = 32;
 
       content = [];
 
       for (let i = 0; i < ((before < 0)? 1 + before : 1); i++) {
-        let index = ((before < 0)? 0 : before) + i * 2;
+        let index = ((before < 0)? 0 : before) + i;
+        if(index < 0) index = 0;
+        if(index > 15) index = 15;
         content.push({
           address: index,
           value: this.cpu.stack.getUint16(index),
@@ -172,7 +174,9 @@ export default {
       });
 
       for (let i = 0; i < 3; i++) {
-        let index = after - 4 + i * 2;
+        let index = after - 2 + i;
+        if(index < 0) index = 0;
+        if(index > 15) index = 15;
         content.push({
           address: index,
           value: this.cpu.stack.getUint16(index),

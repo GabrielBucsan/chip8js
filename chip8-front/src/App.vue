@@ -4,6 +4,7 @@
       <registers ref="registers"></registers>
       <memory ref="memory"></memory>
       <keyboard></keyboard>
+      <span>{{ fps }}</span>
     </div>
     <div>
       <display ref="display"></display>
@@ -25,7 +26,31 @@ export default {
     Keyboard
   },
   inject: ["cpu"],
-  created() {
+  mounted() {
+
+    let lastLoop = new Date();
+    const self = this;
+    let paused = false;
+
+    setInterval(function(){
+      if(self.cpu !== undefined && !paused){
+        let thisLoop = new Date();
+        this.fps = 1000 / (thisLoop - lastLoop);
+        lastLoop = thisLoop;
+
+        self.cpu.step();
+        self.$refs.registers.update();
+        self.$refs.memory.update();
+        self.$refs.display.update();
+      }
+    }, 0);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key == "p") {
+        paused = !paused;
+      }
+    });
+
     window.addEventListener("keydown", (e) => {
       if (e.key == "Enter") {
         this.cpu.step();
@@ -34,10 +59,7 @@ export default {
         this.$refs.display.update();
       }
     });
-  },
-  methods: {
-    run() {},
-  },
+  }
 };
 </script>
 
