@@ -53,7 +53,13 @@ export default {
         self.$parent.$refs.memory.update();
         self.$parent.$refs.display.update();
       }
-    }, 1000 / 60);
+    }, 0);
+
+    setInterval(function(){
+      if(self.cpu !== undefined && !self.paused){
+        self.cpu.tick();
+      }
+    }, 1000/60);
 
     window.addEventListener("keydown", (e) => {
       if (e.keyCode == 32) {

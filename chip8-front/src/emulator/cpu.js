@@ -607,10 +607,13 @@ class CPU {
     if(!this.halted)
       this.nextInstruction = this.fetch();
     this.execute(this.nextInstruction);
+    return;
+  }
+
+  tick(){
     let DT = this.delayTimer.getUint8(0);
     if(DT > 0)
       this.delayTimer.setUint8(0, DT - 1);
-    return;
   }
 
   reset(){
