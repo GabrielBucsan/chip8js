@@ -6,79 +6,88 @@ const decode = function(raw){
   const instruction = raw >> 12;
 
   switch (instruction) {
-    // 00E
     case 0x0: {
       const id = raw & 0xff;
 
       switch (id) {
-        // 00E0
-        // Clears the screen.
         case 0xe0: {
-          return 'CLS';
+          return {
+            mnem: 'CLS',
+            opcode: '00E0',
+            desc: 'Clears the screen'
+          };
         }
-
-        // 00EE
-        // Returns from a subroutine
         case 0xee: {
-          return 'RET'
+          return {
+            mnem: 'RET',
+            opcode: '00EE',
+            desc: 'Returns from a subroutine'
+          };
         }
       }
 
       return '';
     }
-
-    // 1NNN
-    // Jumps to address NNN
     case 0x1: {
       const address = raw & 0xfff;
-      return `JP   ${toHex(address)}`;
+      return {
+            mnem: `JP\xa0\xa0\xa0${toHex(address)}`,
+            opcode: '1NNN',
+            desc: `Jumps to address ${toHex(address)}`
+          };
     }
-
-    // 2NNN
-    // Calls subroutine at NNN
     case 0x2: {
       const address = raw & 0xfff;
-      return `CALL ${toHex(address)}`;
+      return {
+            mnem: `CALL ${toHex(address)}`,
+            opcode: '2NNN',
+            desc: `Calls subroutine at ${toHex(address)}`
+          };
     }
-
-    // 3XNN
-    // Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block)
     case 0x3: {
       const VXIndex = (raw >> 8) & 0xf;
       const value = raw & 0xff;
-      return `SE   V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`;
+      return {
+            mnem: `SE\xa0\xa0\xa0V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`,
+            opcode: '3XNN',
+            desc: `Skips the next instruction if V${toHex(VXIndex, 1)} equals ${toHex(value, 2)}. (Usually the next instruction is a jump to skip a code block)`
+          };
     }
-
-    // 4XNN
-    // Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block)
     case 0x4: {
       const VXIndex = (raw >> 8) & 0xf;
       const value = raw & 0xff;
-      return `SNE  V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`;
+      return {
+            mnem: `SNE\xa0\xa0V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`,
+            opcode: '4XNN',
+            desc: `Skips the next instruction if V${toHex(VXIndex, 1)} doesn't equal ${toHex(value, 2)}. (Usually the next instruction is a jump to skip a code block)`
+          };
     }
-
-    // 5XY0
-    // Skips the next instruction if VX equals VY. (Usually the next instruction is a jump to skip a code block)
     case 0x5: {
       const VXIndex = (raw >> 8) & 0xf;
       const VYIndex = (raw >> 4) & 0xf;
-      return `SE   V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+      return {
+            mnem: `SE\xa0\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '5XY0',
+            desc: `Skips the next instruction if V${toHex(VXIndex, 1)} equals V${toHex(VYIndex, 1)}. (Usually the next instruction is a jump to skip a code block)`
+          };
     }
-
-    // 6XNN
-    // 	Sets VX to NN.
     case 0x6: {
       const VXIndex = (raw >> 8) & 0xf;
       const value = raw & 0xff;
-      return `LD   V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`;
+      return {
+            mnem: `LD\xa0\xa0\xa0V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`,
+            opcode: '6XNN',
+            desc: `Sets V${toHex(VXIndex, 1)} to ${toHex(value, 2)}.`
+          };
     }
-
-    // 7XNN
-    // Adds NN to VX. (Carry flag is not changed)
     case 0x7: {
       const VXIndex = (raw >> 8) & 0xf;
       const value = raw & 0xff;
-      return `ADD  V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`;
+      return {
+            mnem: `ADD\xa0\xa0V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`,
+            opcode: '7XNN',
+            desc: `Adds ${toHex(value, 2)} to V${toHex(VXIndex, 1)}. (Carry flag is not changed)`
+          };
     }
 
     // 8XY
@@ -88,104 +97,116 @@ const decode = function(raw){
       const id = raw & 0xf;
 
       switch (id) {
-        // 8XY0
-        // 	Sets VX to the value of VY.
         case 0x0: {
-          return `LD   V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `LD\xa0\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY0',
+            desc: `Sets V${toHex(VXIndex, 1)} to the value of V${toHex(VYIndex, 1)}`
+          };
         }
-
-        // 8XY1
-        // Sets VX to VX or VY. (Bitwise OR operation)
         case 0x1: {
-          return `OR   V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `OR\xa0\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY1',
+            desc: `Sets V${toHex(VXIndex, 1)} to V${toHex(VXIndex, 1)} or V${toHex(VYIndex, 1)}. (Bitwise OR operation)`
+          };
         }
-
-        // 8XY2
-        // Sets VX to VX and VY. (Bitwise AND operation)
         case 0x2: {
-          return `AND  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `AND\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY2',
+            desc: `Sets V${toHex(VXIndex, 1)} to V${toHex(VXIndex, 1)} and V${toHex(VYIndex, 1)}. (Bitwise AND operation)`
+          };
         }
-
-        // 8XY3
-        // Sets VX to VX xor VY.
         case 0x3: {
-          return `XOR  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `XOR\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY3',
+            desc: `Sets V${toHex(VXIndex, 1)} to V${toHex(VXIndex, 1)} xor V${toHex(VYIndex, 1)}`
+          };
         }
-
-        // 8XY4
-        // Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
         case 0x4: {
-          return `ADD  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `ADD\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY4',
+            desc: `Adds V${toHex(VYIndex, 1)} to V${toHex(VXIndex, 1)}. VF is set to 1 when there's a carry, and to 0 when there isn't`
+          };
         }
-
-        // 8XY5
-        // VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
         case 0x5: {
-          return `SUB  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `SUB\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY5',
+            desc: `V${toHex(VYIndex, 1)} is subtracted from V${toHex(VXIndex, 1)}. VF is set to 0 when there's a borrow, and 1 when there isn't`
+          };
         }
-
-        // 8XY6
-        // Stores the least significant bit of VX in VF and then shifts VX to the right by 1
         case 0x6: {
-          return `SHR  V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `SHR\xa0\xa0V${toHex(VXIndex, 1)}`,
+            opcode: '8XY6',
+            desc: `Stores the least significant bit of V${toHex(VXIndex, 1)} in VF and then shifts V${toHex(VXIndex, 1)} to the right by 1`
+          };
         }
-
-        // 8XY7
-        // Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
         case 0x7: {
-          return `SUBN V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+          return {
+            mnem: `SUBN\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '8XY7',
+            desc: `Sets V${toHex(VXIndex, 1)} to V${toHex(VYIndex, 1)} minus V${toHex(VXIndex, 1)}. VF is set to 0 when there's a borrow, and 1 when there isn't`
+          };
         }
-
-        // 8XYE
-        // Stores the most significant bit of VX in VF and then shifts VX to the left by 1
         case 0xe: {
-          return `SHL  V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `SHL\xa0\xa0V${toHex(VXIndex, 1)}`,
+            opcode: '8XYE',
+            desc: `Stores the most significant bit of V${toHex(VXIndex, 1)} in VF and then shifts V${toHex(VXIndex, 1)} to the left by 1`
+          };
         }
       }
 
       return;
     }
-
-    // 9XY0
-    // Skips the next instruction if VX doesn't equal VY. (Usually the next instruction is a jump to skip a code block)
     case 0x9: {
       const VXIndex = (raw >> 8) & 0xf;
       const VYIndex = (raw >> 4) & 0xf;
-      return `SNE  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`;
+      return {
+            mnem: `SNE\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}`,
+            opcode: '9XY0',
+            desc: `Skips the next instruction if V${toHex(VXIndex, 1)} doesn't equal V${toHex(VYIndex, 1)}. (Usually the next instruction is a jump to skip a code block)`
+          };
     }
-
-    // ANNN
-    // Sets I to the address NNN.
     case 0xa: {
       const address = raw & 0xfff;
-      return `LD   I, ${toHex(address)}`;
+      return {
+            mnem: `LD\xa0\xa0\xa0I, ${toHex(address)}`,
+            opcode: 'ANNN',
+            desc: `Sets I to the address ${toHex(address)}`
+          };
     }
-
-    // BNNN
-    // Jumps to the address NNN plus V0.
     case 0xb: {
       const address = raw & 0xfff;
-      return `JP   V0, V${toHex(address)}`;
+      return {
+            mnem: `JP\xa0\xa0\xa0V0, V${toHex(address)}`,
+            opcode: 'BNNN',
+            desc: `Jumps to the address ${toHex(address)} plus V0`
+          };
     }
-
-    // CXNN
-    // Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
     case 0xc: {
       const VXIndex = (raw >> 8) & 0xf;
       const value = raw & 0xff;
-      return `RND  V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`;
+      return {
+            mnem: `RND\xa0\xa0V${toHex(VXIndex, 1)}, ${toHex(value, 2)}`,
+            opcode: 'CXNN',
+            desc: `Sets V${toHex(VXIndex, 1)} to the result of a bitwise and operation on a random number (Typically: 0 to 255) and ${toHex(value, 2)}`
+          };
     }
-
-    // DXYN
-    // Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N+1 pixels.
-    // Each row of 8 pixels is read as bit-coded starting from memory location I;
-    // I value doesn’t change after the execution of this instruction.
-    // As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen
     case 0xd: {
       const VXIndex = (raw >> 8) & 0xf;
       const VYIndex = (raw >> 4) & 0xf;
       const quantity = (raw & 0xf) + 1;
-      return `DRW  V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}, ${toHex(quantity, 1)}`;
+      return {
+            mnem: `DRW\xa0\xa0V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}, ${toHex(quantity, 1)}`,
+            opcode: 'DXYN',
+            desc: `Draws a sprite at coordinate (V${toHex(VXIndex, 1)}, V${toHex(VYIndex, 1)}) that has a width of 8 pixels and a height of ${quantity + 1} pixels. Each row of 8 pixels is read as bit-coded starting from memory location I. I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen`
+          };
     }
 
     case 0xe: {
@@ -193,18 +214,21 @@ const decode = function(raw){
       const id = raw & 0xff;
 
       switch (id) {
-        // EX9E
-        // Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block)
         case 0x9e: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `SKP  V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `SKP\xa0\xa0V${toHex(VXIndex, 1)}`,
+            opcode: 'EX9E',
+            desc: `Skips the next instruction if the key stored in V${toHex(VXIndex, 1)} is pressed. (Usually the next instruction is a jump to skip a code block)`
+          };
         }
-
-        // EXA1
-        // Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block)
         case 0xa1: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `SKNP V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `SKNP\xa0V${toHex(VXIndex, 1)}`,
+            opcode: 'EXA1',
+            desc: `Skips the next instruction if the key stored in V${toHex(VXIndex, 1)} isn't pressed. (Usually the next instruction is a jump to skip a code block)`
+          };
         }
       }
       return;
@@ -215,67 +239,77 @@ const decode = function(raw){
       const id = raw & 0xff;
 
       switch (id) {
-        // FX07
-        // Sets VX to the value of the delay timer.
         case 0x07: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   V${toHex(VXIndex, 1)}, DT`;
+          return {
+            mnem: `LD\xa0\xa0\xa0V${toHex(VXIndex, 1)}, DT`,
+            opcode: 'FX07',
+            desc: `Sets V${toHex(VXIndex, 1)} to the value of the delay timer`
+          };
         }
-
-        // FX0A
-        // A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event)
         case 0x0a: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   V${toHex(VXIndex, 1)}, K`;
+          return {
+            mnem: `LD\xa0\xa0\xa0V${toHex(VXIndex, 1)}, K`,
+            opcode: 'FX0A',
+            desc: `A key press is awaited, and then stored in V${toHex(VXIndex, 1)}. (Blocking Operation. All instruction halted until next key event)`
+          };
         }
-
-        // FX15
-        // Sets the delay timer to VX.
         case 0x15: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   DT, V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `LD\xa0\xa0\xa0DT, V${toHex(VXIndex, 1)}`,
+            opcode: 'FX15',
+            desc: `Sets the delay timer to V${toHex(VXIndex, 1)}`
+          };
         }
-
-        // FX18
-        // Sets the sound timer to VX.
         case 0x18: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   ST, V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `LD\xa0\xa0\xa0ST, V${toHex(VXIndex, 1)}`,
+            opcode: 'FX18',
+            desc: `Sets the sound timer to V${toHex(VXIndex, 1)}`
+          };
         }
-
-        // FX1E
-        // Adds VX to I. VF is not affected
         case 0x1e: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `ADD  I, V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `ADD\xa0\xa0I, V${toHex(VXIndex, 1)}`,
+            opcode: 'FX1E',
+            desc: `Adds V${toHex(VXIndex, 1)} to I. VF is not affected`
+          };
         }
-
-        // FX29
-        // Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
         case 0x29: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   F, V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `LD\xa0\xa0\xa0F, V${toHex(VXIndex, 1)}`,
+            opcode: 'FX29',
+            desc: `Sets I to the location of the sprite for the character in V${toHex(VXIndex, 1)}. Characters 0-F (in hexadecimal) are represented by a 4x5 font`
+          };
         }
-
-        // FX33
-        // Store BCD representation of Vx in memory locations I, I+1, and I+2.
         case 0x33: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   B, V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `LD\xa0\xa0\xa0B, V${toHex(VXIndex, 1)}`,
+            opcode: 'FX33',
+            desc: `Store BCD representation of V${toHex(VXIndex, 1)} in memory locations I, I+1, and I+2`
+          };
         }
-
-        // FX55
-        // Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
         case 0x55: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   [I], V${toHex(VXIndex, 1)}`;
+          return {
+            mnem: `LD\xa0\xa0\xa0[I], V${toHex(VXIndex, 1)}`,
+            opcode: 'FX55',
+            desc: `Stores V0 to V${toHex(VXIndex, 1)} (including V${toHex(VXIndex, 1)}) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified`
+          };
         }
-
-        // FX65
-        // Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
         case 0x65: {
           const VXIndex = (raw >> 8) & 0xf;
-          return `LD   V${toHex(VXIndex, 1)}, [I]`;
+          return {
+            mnem: `LD\xa0\xa0\xa0V${toHex(VXIndex, 1)}, [I]`,
+            opcode: 'FX65',
+            desc: `Fills V0 to V${toHex(VXIndex, 1)} (including V${toHex(VXIndex, 1)}) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified`
+          };
         }
       }
       return '';

@@ -15,7 +15,7 @@
       >
         <span>{{ content.address | hex(4) }} </span>
         <span>{{ content.value | hex(4) }}</span>
-        <span>{{ content.opcode }}</span>
+        <span>{{ content.instruction.mnem }}</span>
       </div>
     </div>
     <div class='grid-50'>
@@ -52,6 +52,13 @@
         </div>
       </div>
     </div>
+    <div class="memory-container">
+      <div class="memory-label">
+        <span>{{ selectedInstruction.opcode }}</span>
+        <span> ({{ selectedInstruction.mnem }})</span>
+      </div>
+      <span class='margin-top-5'>{{ selectedInstruction.desc }}</span>
+    </div>
   </div>
 </template>
 
@@ -74,119 +81,39 @@ export default {
   methods: {
     update() {
       const pcAddress = this.cpu.getProgramCounter();
+      this.pcMemory = this.createList(pcAddress, 10, 3, this.cpu.memory, true);
 
-      let before = pcAddress - 6;
-      if (before < 0) before = 0;
+      this.selectedInstruction = this.pcMemory.filter(item => item.selected)[0].instruction;
 
-      let after = pcAddress + 12;
-      if (after > 4096) after = 4096;
+      const iAddress = this.cpu.addressRegister.getUint16(0);
+      this.iMemory = this.createList(iAddress, 5, 1, this.cpu.memory);
+
+      const stackAddress = this.cpu.stackPointer.getUint8(0);
+      this.stack = this.createList(stackAddress, 5, 5, this.cpu.stack);
+
+    },
+    createItem(address, location, selected = false, hasOpcode = false){
+      return {
+          address: address,
+          value: location.getUint16(address),
+          instruction: (hasOpcode)? d.decode(location.getUint16(address)) : '',
+          selected: selected,
+        };
+    },
+    createList(address, nItens, nItensBefore, location, hasOpcode = false){
+      let before = address - nItensBefore * 2;
+      if(before < 0) before = 0;
 
       let content = [];
 
-      for (let i = 0; i < ((before < 0)? 3 + before : 3); i++) {
-        let index = ((before < 0)? 0 : before) + i * 2;
-        content.push({
-          address: index,
-          value: this.cpu.getMemoryAt16(index),
-          opcode: d.decode(this.cpu.getMemoryAt16(index)),
-          selected: false,
-        });
+      for (let i = 0; i < nItens; i++) {
+        let index = before + i * 2;
+        if(index > location.byteLength) index = location.byteLength - 2; 
+        content.push(this.createItem(index, location, index == address, hasOpcode));
       }
 
-      content.push({
-        address: pcAddress,
-        value: this.cpu.getMemoryAt16(pcAddress),
-        opcode: d.decode(this.cpu.getMemoryAt16(pcAddress)),
-        selected: true,
-      });
-
-      for (let i = 0; i < 6; i++) {
-        let index = after - 10 + i * 2;
-        content.push({
-          address: index,
-          value: this.cpu.getMemoryAt16(index),
-          opcode: d.decode(this.cpu.getMemoryAt16(index)),
-          selected: false,
-        });
-      }
-
-      this.pcMemory = content;
-
-      const iAddress = this.cpu.addressRegister.getUint16(0);
-
-      before = iAddress - 2;
-
-      after = iAddress + 6;
-      if (after > 4096) after = 4096;
-
-      content = [];
-
-      for (let i = 0; i < ((before < 0)? 1 + before : 1); i++) {
-        let index = ((before < 0)? 0 : before) + i * 2;
-        content.push({
-          address: index,
-          value: this.cpu.getMemoryAt16(index),
-          selected: false,
-        });
-      }
-
-      content.push({
-        address: iAddress,
-        value: this.cpu.getMemoryAt16(iAddress),
-        selected: true,
-      });
-
-      for (let i = 0; i < 3; i++) {
-        let index = after - 4 + i * 2;
-        content.push({
-          address: index,
-          value: this.cpu.getMemoryAt16(index),
-          selected: false,
-        });
-      }
-
-      this.iMemory = content;
-
-      const stackAddress = this.cpu.stackPointer.getUint8(0);
-
-      before = stackAddress - 1;
-
-      after = stackAddress + 3;
-      if (after > 32) after = 32;
-
-      content = [];
-
-      for (let i = 0; i < ((before < 0)? 1 + before : 1); i++) {
-        let index = ((before < 0)? 0 : before) + i;
-        if(index < 0) index = 0;
-        if(index > 15) index = 15;
-        content.push({
-          address: index,
-          value: this.cpu.stack.getUint16(index),
-          selected: false,
-        });
-      }
-
-      content.push({
-        address: stackAddress,
-        value: this.cpu.stack.getUint16(stackAddress),
-        selected: true,
-      });
-
-      for (let i = 0; i < 3; i++) {
-        let index = after - 2 + i;
-        if(index < 0) index = 0;
-        if(index > 15) index = 15;
-        content.push({
-          address: index,
-          value: this.cpu.stack.getUint16(index),
-          opcode: d.decode(this.cpu.stack.getUint16(index)),
-          selected: false,
-        });
-      }
-
-      this.stack = content;
-    },
+      return content;
+    }
   },
 };
 </script>
@@ -210,8 +137,9 @@ export default {
 .memory-label {
   position: absolute;
   top: -12px;
-  left: calc(50% - 75px);
-  width: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 15px;
   text-align: center;
   background-color: var(--background-color);
 }
@@ -244,5 +172,9 @@ export default {
   grid-template-columns: repeat(auto-fill, calc(50% - 5px));
   grid-template-rows: 100%;
   grid-gap: 10px;
+}
+
+.margin-top-5{
+  margin-top: 5px;
 }
 </style>

@@ -111,8 +111,9 @@ export default {
 .register-label {
   position: absolute;
   top: -12px;
-  left: calc(50% - 50px);
-  width: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 15px;
   text-align: center;
   background-color: var(--background-color);
 }

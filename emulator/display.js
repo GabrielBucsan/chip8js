@@ -58,32 +58,6 @@ class Display {
 
     return alteredPixels;
   }
-
-  print() {
-    if (this.clear)
-      console.clear();
-
-    console.log(this.topLine);
-    console.log(this.bottomLine);
-    console.log("    ".padEnd(134, '_'));
-    console.log("   |" + "".padEnd(130, ' ') + "|");
-
-    for (let y = 0; y < this.sizeY; y++) {
-
-      let line = `${y.toString().padStart(2, '0')} | `;
-
-      for (let x = 0; x < this.sizeX; x++) {
-        let binary = this.displayMemory.getUint8(y * this.sizeX + x).toString(2).padStart(8, '0');
-        let result = binary.replace(/1/g, "▓▓").replace(/0/g, '  ');
-        line += result;
-      }
-
-      line += ' |';
-      console.log(line);
-    }
-
-    console.log("   |" + "".padStart(130, '_') + "|");
-  }
 }
 
 export default Display;
