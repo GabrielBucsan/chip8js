@@ -2,8 +2,7 @@
   <div id="programController">
     <div class="program-container">
       <div>
-        <span class='option'>Enter: select option</span>
-        <span class='option'>Esc: back</span>
+        <span class='option'>Enter: select</span>
         <span class='option'>P: {{(paused)? 'resume' : 'pause'}} execution</span>
         <span class='option' v-if='paused'>Space: step</span>
         <span class='option' v-if='!paused'>FPS: {{fps | formatFps}}</span>
@@ -25,7 +24,7 @@ export default {
   inject: ["cpu"],
   data() {
     return {
-      paused: false,
+      paused: true,
       roms: [],
       selectedIndex: 0,
       fps: 0

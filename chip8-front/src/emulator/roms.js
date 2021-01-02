@@ -9,9 +9,14 @@ import puzzle15 from './roms/15puzzle.js';
 import brix from './roms/brix.js';
 import maze from './roms/maze.js';
 import life from './roms/life.js';
+import intro from './roms/intro.js';
 
 const roms = [
   {
+    name: 'Intro',
+    id: 'intro',
+    file: intro
+  },{
     name: 'Chip8 Logo',
     id: 'chip8Logo',
     file: chip8Logo

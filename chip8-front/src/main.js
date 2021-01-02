@@ -17,6 +17,8 @@ const cpu = new CPU(memory, display);
 
 const writable = new Uint8Array(3583);
 
+console.log(roms);
+
 for (let i = 0; i < roms[0].file.length; i++) {
   writable[i] = roms[0].file[i];
 }
