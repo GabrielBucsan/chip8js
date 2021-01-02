@@ -24,7 +24,7 @@ export default {
   inject: ["cpu"],
   data() {
     return {
-      paused: true,
+      paused: false,
       roms: [],
       selectedIndex: 0,
       fps: 0
