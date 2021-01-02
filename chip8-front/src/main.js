@@ -17,8 +17,8 @@ const cpu = new CPU(memory, display);
 
 const writable = new Uint8Array(3583);
 
-for (let i = 0; i < roms['invaders'].length; i++) {
-  writable[i] = roms['invaders'][i];
+for (let i = 0; i < roms['tetris'].length; i++) {
+  writable[i] = roms['tetris'][i];
 }
 
 // let i = 0;

@@ -199,9 +199,9 @@ class CPU {
           // Returns from a subroutine
           case 0xee: {
             const stackPos = this.stackPointer.getUint8(0);
-            const address = this.stack.getUint16(stackPos - 1);
+            const address = this.stack.getUint16(stackPos - 2);
             this.setProgramCounter(address);
-            this.stackPointer.setUint8(0, stackPos - 1);
+            this.stackPointer.setUint8(0, stackPos - 2);
             return;
           }
         }
@@ -224,7 +224,7 @@ class CPU {
         const stackPos = this.stackPointer.getUint8(0);
         this.stack.setUint16(stackPos, this.getProgramCounter());
         this.setProgramCounter(address);
-        this.stackPointer.setUint8(0, stackPos + 1);
+        this.stackPointer.setUint8(0, stackPos + 2);
         return;
       }
 
