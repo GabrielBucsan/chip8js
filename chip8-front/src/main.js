@@ -17,41 +17,9 @@ const cpu = new CPU(memory, display);
 
 const writable = new Uint8Array(3583);
 
-for (let i = 0; i < roms['tetris'].length; i++) {
-  writable[i] = roms['tetris'][i];
+for (let i = 0; i < roms[0].file.length; i++) {
+  writable[i] = roms[0].file[i];
 }
-
-// let i = 0;
-
-// writable[i++] = 0x60;
-// writable[i++] = 0x38;
-
-// writable[i++] = 0x61;
-// writable[i++] = 0x1b;
-
-// writable[i++] = 0xA0;
-// writable[i++] = 0x05;
-
-// writable[i++] = 0xD0;
-// writable[i++] = 0x15;
-
-// writable[i++] = 0x60;
-// writable[i++] = 0x07;
-
-// writable[i++] = 0xA0;
-// writable[i++] = 0x00;
-
-// writable[i++] = 0xD0;
-// writable[i++] = 0x14;
-
-// writable[i++] = 0x60;
-// writable[i++] = 0x0c;
-
-// writable[i++] = 0xa0;
-// writable[i++] = 0x0a;
-
-// writable[i++] = 0xd0;
-// writable[i++] = 0x14;
 
 cpu.loadProgram(writable);
 

@@ -8,6 +8,7 @@
     </div>
     <div>
       <display ref="display"></display>
+      <program-controller></program-controller>
     </div>
   </div>
 </template>
@@ -17,48 +18,15 @@ import Registers from "./modules/registers/registers.vue";
 import Memory from "./modules/memory/memory.vue";
 import Display from "./modules/display/display.vue";
 import Keyboard from "./modules/keyboard/keyboard.vue";
+import ProgramController from "./modules/programController/programController.vue";
 export default {
   name: "App",
   components: {
     Registers,
     Memory,
     Display,
-    Keyboard
-  },
-  inject: ["cpu"],
-  mounted() {
-
-    let lastLoop = new Date();
-    const self = this;
-    let paused = false;
-
-    setInterval(function(){
-      if(self.cpu !== undefined && !paused){
-        let thisLoop = new Date();
-        this.fps = 1000 / (thisLoop - lastLoop);
-        lastLoop = thisLoop;
-
-        self.cpu.step();
-        self.$refs.registers.update();
-        self.$refs.memory.update();
-        self.$refs.display.update();
-      }
-    }, 0);
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key == "p") {
-        paused = !paused;
-      }
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key == "Enter") {
-        this.cpu.step();
-        this.$refs.registers.update();
-        this.$refs.memory.update();
-        this.$refs.display.update();
-      }
-    });
+    Keyboard,
+    ProgramController
   }
 };
 </script>

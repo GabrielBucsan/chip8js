@@ -22,7 +22,7 @@ class CPU {
     this.halted = false;
 
     // FILLS THE INITIAL MEMORY ADDRESSES WITH THE CHARACTERS FROM 0 TO F
-    const sprites = [
+    this.sprites = [
       0xf0,
       0x90,
       0x90,
@@ -105,8 +105,8 @@ class CPU {
       0x80, // F
     ];
 
-    for (let i = 0; i < sprites.length; i++) {
-      this.memory.setUint8(i, sprites[i]);
+    for (let i = 0; i < this.sprites.length; i++) {
+      this.memory.setUint8(i, this.sprites[i]);
     }
 
     this.keyMap = [
@@ -611,6 +611,41 @@ class CPU {
     if(DT > 0)
       this.delayTimer.setUint8(0, DT - 1);
     return;
+  }
+
+  reset(){
+
+    this.display.clearDisplay();
+
+    for (let i = 0; i < this.registers.byteLength; i++) {
+      this.registers.setInt8(i, 0);
+    }
+    this.programCounter.setUint16(0, 0x200);
+    this.addressRegister.setInt16(0, 0);
+    this.stackPointer.setInt8(0, 0);
+    this.delayTimer.setInt8(0, 0);
+    this.soundTimer.setInt8(0, 0);
+
+    for (let i = 0; i < this.stack.byteLength; i++) {
+      this.stack.setInt8(i, 0);
+    }
+
+    this.halted = false;
+
+    for (let i = 0; i < this.memory.byteLength; i++) {
+      this.memory.setUint8(i, 0);
+    }
+
+    for (let i = 0; i < this.sprites.length; i++) {
+      this.memory.setUint8(i, this.sprites[i]);
+    }
+
+    this.keyPressed = [];
+    this.lastKeyPressed = undefined;
+
+    for (let i = 0; i < this.keyMap.length; i++) {
+      this.keyPressed[this.keyMap[i]] = false;
+    }
   }
 }
 

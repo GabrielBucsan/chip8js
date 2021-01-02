@@ -10,18 +10,52 @@ import brix from './roms/brix.js';
 import maze from './roms/maze.js';
 import life from './roms/life.js';
 
-const roms = {
-  chip8Logo,
-  invaders,
-  test1,
-  test2,
-  pong,
-  trip8,
-  tetris,
-  puzzle15,
-  brix,
-  maze,
-  life
-}
+const roms = [
+  {
+    name: 'Chip8 Logo',
+    id: 'chip8Logo',
+    file: chip8Logo
+  },{
+    name: 'Space Invaders',
+    id: 'invaders',
+    file: invaders
+  },{
+    name: 'Tetris',
+    id: 'tetris',
+    file: tetris
+  },{
+    name: 'Pong',
+    id: 'pong',
+    file: pong
+  },{
+    name: 'Trip8',
+    id: 'trip8',
+    file: trip8
+  },{
+    name: 'Puzzle 15',
+    id: 'puzzle15',
+    file: puzzle15
+  },{
+    name: 'Brix',
+    id: 'brix',
+    file: brix
+  },{
+    name: 'Maze',
+    id: 'maze',
+    file: maze
+  },{
+    name: 'Life',
+    id: 'life',
+    file: life
+  },{
+    name: 'Test 1',
+    id: 'test1',
+    file: test1
+  },{
+    name: 'Test 2',
+    id: 'test2',
+    file: test2
+  }
+]
 
 export default roms;
