@@ -5,7 +5,7 @@
       <div class="memory-header">
         <span>ADDRESS</span>
         <span>CONTENT</span>
-        <span>OPCODE</span>
+        <span>INSTRUCTION</span>
       </div>
       <div
         v-for="content in pcMemory"
