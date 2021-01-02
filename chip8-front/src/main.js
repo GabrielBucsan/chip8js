@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import App from './App.vue'
-import CPU from "../../emulator/cpu.js";
-import mem from '../../emulator/memory.js';
-import Display from "../../emulator/display.js";
-import roms from "../../emulator/roms.js";
+import CPU from "./emulator/cpu.js";
+import mem from './emulator/memory.js';
+import Display from "./emulator/display.js";
+import roms from "./emulator/roms.js";
 
 Vue.config.productionTip = false
 Vue.filter("hex", function(value, size = 2){

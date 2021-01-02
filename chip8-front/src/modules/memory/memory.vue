@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import d from "../../../../emulator/decoder.js";
+import d from "../../emulator/decoder.js";
 
 export default {
   name: "Memory",
