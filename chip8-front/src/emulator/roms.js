@@ -10,6 +10,7 @@ import brix from './roms/brix.js';
 import maze from './roms/maze.js';
 import life from './roms/life.js';
 import intro from './roms/intro.js';
+import rndTest from './roms/rndTest.js';
 
 const roms = [
   {
@@ -60,6 +61,10 @@ const roms = [
     name: 'Test 2',
     id: 'test2',
     file: test2
+  },{
+    name: 'Random Number Test',
+    id: 'rndTest',
+    file: rndTest
   }
 ]
 

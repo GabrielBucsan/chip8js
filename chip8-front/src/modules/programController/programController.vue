@@ -8,9 +8,13 @@
         <span class='option' v-if='!paused'>FPS: {{fps | formatFps}}</span>
       </div>
       <div class='rom-list'>
+        <span v-if='romIndex != 0'>&#8593;</span>
+        <span v-if='romIndex == 0' class='padding-offset'></span>
         <div v-for='(rom, index) in roms' :key='rom.id'>
-          <span v-bind:class="{ 'selected': index == selectedIndex }">{{ rom.name }}</span>
+          <span v-bind:class="{ 'selected': index == selectedIndex - romIndex }">{{ rom.name }}</span>
         </div>
+        <span v-if='totalRomLength - romIndex != showedRoms'>&#8595;</span>
+        <span v-if='totalRomLength - romIndex == showedRoms' class='padding-offset'></span>
       </div>
     </div>
   </div>
@@ -26,6 +30,9 @@ export default {
     return {
       paused: false,
       roms: [],
+      totalRomLength: 0,
+      showedRoms: 10,
+      romIndex: 0,
       selectedIndex: 0,
       fps: 0
     };
@@ -39,7 +46,9 @@ export default {
     let lastLoop = new Date();
     const self = this;
 
-    this.roms = roms;
+    this.totalRomLength = roms.length;
+
+    this.buildRomList();
 
     setInterval(function(){
       if(self.cpu !== undefined && !self.paused){
@@ -74,12 +83,24 @@ export default {
         this.selectRom();
       }
       if (e.keyCode == 38) {
-        if(this.selectedIndex > 0)
+        if(this.selectedIndex == 0){
+          this.selectedIndex = this.totalRomLength - 1;
+          this.buildRomList(false);
+        }
+        else
           this.selectedIndex--;
+
+        this.changeRomList(true);
       }
       if (e.keyCode == 40) {
-        if(this.selectedIndex < (this.roms.length - 1))
+        if(this.selectedIndex == (this.totalRomLength - 1)){
+          this.selectedIndex = 0;
+          this.buildRomList();
+        }
+        else
           this.selectedIndex++;
+
+        this.changeRomList(false);
       }
     });
   },
@@ -101,6 +122,35 @@ export default {
       this.cpu.loadProgram(writable);
 
       this.paused = false;
+    },
+    buildRomList(start = true){
+      this.roms = [];
+      if(start){
+        for (let i = 0; i < this.showedRoms; i++) {
+          this.roms.push(roms[i]);
+          this.romIndex = 0;
+        }
+      }else{
+        for (let i = roms.length - this.showedRoms; i < roms.length; i++) {
+          this.roms.push(roms[i]);
+          this.romIndex = roms.length - this.showedRoms;
+        }
+      }
+    },
+    changeRomList(up){
+      if(up){
+        if(this.selectedIndex < this.romIndex){
+          this.roms.pop();
+          this.roms.unshift(roms[this.selectedIndex]);
+          this.romIndex--;
+        }
+      }else{
+        if(this.selectedIndex >= this.showedRoms + this.romIndex){
+          this.roms.shift();
+          this.roms.push(roms[this.selectedIndex]);
+          this.romIndex++;
+        }
+      }
     }
   }
 };
@@ -135,5 +185,9 @@ export default {
   color: var(--background-color);
   background-color: var(--primary-color);
   font-weight: bold;
+}
+
+.padding-offset{
+  padding-top: 17.6px;
 }
 </style>
