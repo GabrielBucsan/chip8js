@@ -3,12 +3,13 @@
     <div class="left-panel">
       <registers ref="registers"></registers>
       <memory ref="memory"></memory>
-      <keyboard></keyboard>
-      <span>{{ fps }}</span>
     </div>
-    <div>
+    <div class='right-panel'>
       <display ref="display"></display>
-      <program-controller></program-controller>
+      <div class='row'>
+        <program-controller></program-controller>
+        <keyboard></keyboard>
+      </div>
     </div>
   </div>
 </template>
@@ -61,9 +62,14 @@ body {
   grid-template-columns: 40% 60%;
 }
 
-.left-panel {
+.left-panel, .right-panel {
   padding: 10px;
   display: flex;
   flex-flow: column;
+}
+
+.row{
+  display: flex;
+  flex-flow: row;
 }
 </style>
