@@ -9,6 +9,7 @@
       <div class='row'>
         <program-controller></program-controller>
         <keyboard></keyboard>
+        <sound ref='sound'></sound>
       </div>
     </div>
   </div>
@@ -20,6 +21,7 @@ import Memory from "./modules/memory/memory.vue";
 import Display from "./modules/display/display.vue";
 import Keyboard from "./modules/keyboard/keyboard.vue";
 import ProgramController from "./modules/programController/programController.vue";
+import Sound from "./modules/sound/sound.vue";
 export default {
   name: "App",
   components: {
@@ -27,7 +29,8 @@ export default {
     Memory,
     Display,
     Keyboard,
-    ProgramController
+    ProgramController,
+    Sound
   }
 };
 </script>

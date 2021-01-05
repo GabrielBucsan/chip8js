@@ -170,6 +170,10 @@ class CPU {
     return this.memory.getUint16(index);
   }
 
+  getSoundTimer(){
+    return this.soundTimer.getUint8(0);
+  }
+
   fetch() {
     const address = this.getProgramCounter();
     const content =
@@ -614,6 +618,10 @@ class CPU {
     let DT = this.delayTimer.getUint8(0);
     if(DT > 0)
       this.delayTimer.setUint8(0, DT - 1);
+
+    let ST = this.soundTimer.getUint8(0);
+    if(ST > 0)
+      this.soundTimer.setUint8(0, ST - 1);
   }
 
   reset(){

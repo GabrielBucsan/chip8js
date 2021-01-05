@@ -60,6 +60,7 @@ export default {
         self.$parent.$refs.registers.update();
         self.$parent.$refs.memory.update();
         self.$parent.$refs.display.update();
+        self.$parent.$refs.sound.update();
       }
     }, 0);
 
@@ -75,6 +76,7 @@ export default {
         this.$parent.$refs.registers.update();
         this.$parent.$refs.memory.update();
         this.$parent.$refs.display.update();
+        this.$parent.$refs.sound.update();
       }
       if (e.key == "p") {
         this.paused = !this.paused;
